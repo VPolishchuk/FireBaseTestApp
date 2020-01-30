@@ -1,23 +1,18 @@
 import { Provider } from 'react-redux';
 import React, { Component } from 'react';
 import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from 'react-toastify';
-import { createBrowserHistory as createHistory } from 'history';
+import { ConnectedRouter } from 'connected-react-router'
 import {
   Route,
   Switch, 
-  Router} from 'react-router-dom';
-import {
-  ConnectedRouter,
-  routerMiddleware } from 'react-router-redux';
+  Router,
+  Link } from 'react-router-dom';
 // component
-import AuthComponent from './component/auth/index';
-import ListComponent from './component/list/index';
+import AuthComponent from './features/auth/index';
+import ListComponent from './features/list/index';
 // root
-import createStore from './store';
+import configureStore, { history } from './store';
 //////////////////////////////////////////////
-
-export const history = createHistory();
 
 const routeConfig = [
   {
@@ -30,17 +25,24 @@ const routeConfig = [
   }
 ]
 
-const store = createStore(
-  routerMiddleware(history)
-);
+const store = configureStore();
 
 
-//TODO: after add here redux-store and create auth-component  structure in this file will be changed
 export class AppRouter extends Component {
   render() {
     return (
       <Provider store={store}>
         <ConnectedRouter history={history}>
+          <nav>
+            <ul>
+              <li>
+                <Link to="/list">Home</Link>
+              </li>
+              <li>
+                <Link to="/sing-in">sing-in</Link>
+              </li>
+            </ul>
+          </nav>
           <Switch>
             {
               routeConfig.map(
@@ -50,9 +52,6 @@ export class AppRouter extends Component {
               )
             }
           </Switch>
-          <ToastContainer
-            autoClose={4000}
-          />
         </ConnectedRouter>
       </Provider>
     )

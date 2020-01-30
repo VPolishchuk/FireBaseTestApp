@@ -1,37 +1,37 @@
-import logger from 'redux-logger';
-import { createStore as createReduxStore, applyMiddleware, compose } from 'redux';
-// root
-import rootReducer from './reducers';
-/////////////////////////////////////////
-
+import { createBrowserHistory } from 'history'
+import { applyMiddleware, compose, createStore } from 'redux'
+import { routerMiddleware } from 'connected-react-router'
+import createRootReducer from './reducers'
+import { composeWithDevTools } from 'redux-devtools-extension/logOnlyInProduction';
+/////////////////////////////////////////////////////////////
+export const history = createBrowserHistory()
 let initialState = {};
-let devToolsExtensionComposable = null;
-// zalmoxisus/redux-devtools-extension
-// https://github.com/zalmoxisus/redux-devtools-extension#implementation
-if (window.devToolsExtension) {
-  devToolsExtensionComposable = window.devToolsExtension();
-}
-
-
-export const createStore = (
-  ...additionalMiddlewares) => {
-  const middleWares = [
-    logger,
-    ...additionalMiddlewares,
-  ];
-  const composables = [applyMiddleware(...middleWares)];
-  if (devToolsExtensionComposable) composables.push(devToolsExtensionComposable);
-  const store = createReduxStore(
-    rootReducer,
+export default function configureStore(preloadedState) {
+  console.log('preloadedState_____', preloadedState)
+  const store = createStore(
+    createRootReducer(history),
     initialState,
-    compose(...composables)
-  );
+    preloadedState,
+    composeWithDevTools(
+      compose(
+        applyMiddleware(
+          routerMiddleware(history),
+        ),
+      ),
+    )
+  )
+
+  // if (module.hot) {
+  //   module.hot.accept('./reducers', () => {
+  //     console.log('reloadReduser')
+  //     store.replaceReducer(createRootReducer(history))
+  //   })
+  // }
+
   if (module.hot) {
     module.hot.accept('./reducers', () => {
-      store.replaceReducer(rootReducer(store.injectedReducers));
+      store.replaceReducer(createRootReducer(store.injectedReducers));
     });
   }
   return store;
-};
-
-export default createStore;
+}
